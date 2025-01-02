@@ -42,7 +42,7 @@ namespace ClientSample
                 // Automatically save 'FastResume' data when TorrentManager.StopAsync is invoked, automatically load it
                 // before hash checking the torrent. Fast Resume data will be loaded as part of 'engine.AddAsync' if
                 // torrent metadata is available. Otherwise, if a magnetlink is used to download a torrent, fast resume
-                // data will be loaded after the metadata has been downloaded. 
+                // data will be loaded after the metadata has been downloaded.
                 AutoSaveLoadFastResume = true,
 
                 // If a MagnetLink is used to download a torrent, the engine will try to load a copy of the metadata
@@ -54,6 +54,10 @@ namespace ClientSample
                 ListenEndPoints = new Dictionary<string, IPEndPoint> {
                     { "ipv4", new IPEndPoint (IPAddress.Any, 55123) },
                     { "ipv6", new IPEndPoint (IPAddress.IPv6Any, 55123) }
+                },
+                OutgoingEndPoints = new Dictionary<string, IPEndPoint> {
+                    { "ipv4", new IPEndPoint (IPAddress.Any, 0) },
+                    { "ipv6", new IPEndPoint (IPAddress.IPv6Any, 0) }
                 },
 
                 // Use a fixed port for DHT communications for testing purposes. Production usages should use a random port, 0, if possible.

@@ -13,10 +13,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -98,7 +98,7 @@ namespace MonoTorrent.Client
         /// and will be implicitly loaded before the <see cref="TorrentManager"/> is returned by <see cref="ClientEngine.AddAsync"/>
         /// Otherwise fast resume data will not be saved or restored and <see cref="TorrentManager"/>
         /// instances will have to perform a full hash check when they start.
-        /// Defaults to <see langword="true"/>. 
+        /// Defaults to <see langword="true"/>.
         /// </summary>
         public bool AutoSaveLoadFastResume { get; set; }
 
@@ -107,7 +107,7 @@ namespace MonoTorrent.Client
         /// from <see cref="EngineSettings.MetadataCacheDirectory"/>, if it exists, when the <see cref="MagnetLink"/> is added to the engine using
         /// <see cref="ClientEngine.AddAsync"/>. Additionally, metadata will be written to this directory if it is successfully retrieved
         /// from peers so future downloads can start immediately.
-        /// Defaults to <see langword="true"/>. 
+        /// Defaults to <see langword="true"/>.
         /// </summary>
         public bool AutoSaveLoadMagnetLinkMetadata { get; set; }
 
@@ -210,6 +210,11 @@ namespace MonoTorrent.Client
         /// available port. Choose -1 to disable listening for incoming connections. Defaults to 0.
         /// </summary>
         public Dictionary<string, IPEndPoint> ListenEndPoints { get; set; }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public Dictionary<string, IPEndPoint> OutgoingEndPoints { get; set; }
 
         /// <summary>
         /// The maximum number of concurrent open connections overall. Defaults to 150.
@@ -350,6 +355,7 @@ namespace MonoTorrent.Client
             FileCreationMode = settings.FileCreationOptions;
             httpStreamingPrefix = settings.HttpStreamingPrefix;
             ListenEndPoints = new Dictionary<string, IPEndPoint> (settings.ListenEndPoints);
+            OutgoingEndPoints = new Dictionary<string, IPEndPoint> (settings.OutgoingLocalEndPoints);
             ReportedListenEndPoints = new Dictionary<string, IPEndPoint> (settings.ReportedListenEndPoints);
             MaximumConnections = settings.MaximumConnections;
             MaximumDiskReadRate = settings.MaximumDiskReadRate;
@@ -397,6 +403,7 @@ namespace MonoTorrent.Client
                 fileCreationMode: FileCreationMode,
                 httpStreamingPrefix: HttpStreamingPrefix,
                 listenEndPoints: ListenEndPoints,
+                outgoingEndPoints: OutgoingEndPoints,
                 maximumConnections: MaximumConnections,
                 maximumDiskReadRate: MaximumDiskReadRate,
                 maximumDiskWriteRate: MaximumDiskWriteRate,

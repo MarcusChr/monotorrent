@@ -28,6 +28,7 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.Net;
 
 using MonoTorrent.Connections.Peer;
@@ -58,7 +59,7 @@ namespace MonoTorrent.Client
             IsIncoming = isIncoming;
         }
 
-        public ReusableTask ConnectAsync ()
+        public ReusableTask ConnectAsync (IDictionary<string, IPEndPoint> settingsOutgoingLocalEndPoints)
         {
             return ReusableTask.CompletedTask;
         }

@@ -13,10 +13,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -86,7 +86,7 @@ namespace MonoTorrent.Client
         /// and will be implicitly loaded before the <see cref="TorrentManager"/> is returned by <see cref="ClientEngine.AddAsync"/>
         /// Otherwise fast resume data will not be saved or restored and <see cref="TorrentManager"/>
         /// instances will have to perform a full hash check when they start.
-        /// Defaults to <see langword="true"/>. 
+        /// Defaults to <see langword="true"/>.
         /// </summary>
         public bool AutoSaveLoadFastResume { get; } = true;
 
@@ -95,7 +95,7 @@ namespace MonoTorrent.Client
         /// from <see cref="MetadataCacheDirectory"/>, if it exists, when the <see cref="MagnetLink"/> is added to the engine using
         /// <see cref="ClientEngine.AddAsync"/>. Additionally, metadata will be written to this directory if it is successfully retrieved
         /// from peers so future downloads can start immediately.
-        /// Defaults to <see langword="true"/>. 
+        /// Defaults to <see langword="true"/>.
         /// </summary>
         public bool AutoSaveLoadMagnetLinkMetadata { get; } = true;
 
@@ -186,6 +186,14 @@ namespace MonoTorrent.Client
         /// both with port 0.
         /// </summary>
         public IDictionary<string, IPEndPoint> ListenEndPoints { get; } = new ReadOnlyDictionary<string, IPEndPoint> (new Dictionary<string, IPEndPoint> {
+            {"ipv4", new IPEndPoint (IPAddress.Any, 0) },
+            {"ipv6", new IPEndPoint (IPAddress.IPv6Any, 0) }
+        });
+
+        /// <summary>
+        ///
+        /// </summary>
+        public IDictionary<string, IPEndPoint> OutgoingLocalEndPoints { get; } = new ReadOnlyDictionary<string, IPEndPoint> (new Dictionary<string, IPEndPoint> {
             {"ipv4", new IPEndPoint (IPAddress.Any, 0) },
             {"ipv6", new IPEndPoint (IPAddress.IPv6Any, 0) }
         });
@@ -283,14 +291,19 @@ namespace MonoTorrent.Client
 
         }
 
-        internal EngineSettings (
-            IList<EncryptionType> allowedEncryption, bool allowHaveSuppression, bool allowLocalPeerDiscovery, bool allowPortForwarding,
-            bool autoSaveLoadDhtCache, bool autoSaveLoadFastResume, bool autoSaveLoadMagnetLinkMetadata, string cacheDirectory,
-            TimeSpan connectionTimeout, IPEndPoint? dhtEndPoint, int diskCacheBytes, CachePolicy diskCachePolicy, FastResumeMode fastResumeMode,
+        internal EngineSettings (IList<EncryptionType> allowedEncryption, bool allowHaveSuppression,
+            bool allowLocalPeerDiscovery, bool allowPortForwarding,
+            bool autoSaveLoadDhtCache, bool autoSaveLoadFastResume, bool autoSaveLoadMagnetLinkMetadata,
+            string cacheDirectory,
+            TimeSpan connectionTimeout, IPEndPoint? dhtEndPoint, int diskCacheBytes, CachePolicy diskCachePolicy,
+            FastResumeMode fastResumeMode,
             FileCreationOptions fileCreationMode, Dictionary<string, IPEndPoint> listenEndPoints,
-            int maximumConnections, int maximumDiskReadRate, int maximumDiskWriteRate, int maximumDownloadRate, int maximumHalfOpenConnections,
-            int maximumOpenFiles, int maximumUploadRate, IDictionary<string, IPEndPoint> reportedListenEndPoints, bool usePartialFiles,
-            TimeSpan webSeedConnectionTimeout, TimeSpan webSeedDelay, int webSeedSpeedTrigger, TimeSpan staleRequestTimeout,
+            int maximumConnections, int maximumDiskReadRate, Dictionary<string, IPEndPoint> outgoingEndPoints,
+            int maximumDiskWriteRate, int maximumDownloadRate, int maximumHalfOpenConnections,
+            int maximumOpenFiles, int maximumUploadRate, IDictionary<string, IPEndPoint> reportedListenEndPoints,
+            bool usePartialFiles,
+            TimeSpan webSeedConnectionTimeout, TimeSpan webSeedDelay, int webSeedSpeedTrigger,
+            TimeSpan staleRequestTimeout,
             string httpStreamingPrefix, IList<TimeSpan> connectionRetryDelays)
         {
             // Make sure this is immutable now
@@ -313,6 +326,7 @@ namespace MonoTorrent.Client
             FileCreationOptions = fileCreationMode;
             HttpStreamingPrefix = httpStreamingPrefix;
             ListenEndPoints = new ReadOnlyDictionary<string, IPEndPoint> (new Dictionary<string, IPEndPoint> (listenEndPoints));
+            OutgoingLocalEndPoints = new ReadOnlyDictionary<string, IPEndPoint> (new Dictionary<string, IPEndPoint> (outgoingEndPoints));
             MaximumConnections = maximumConnections;
             MaximumDiskReadRate = maximumDiskReadRate;
             MaximumDiskWriteRate = maximumDiskWriteRate;
@@ -355,7 +369,7 @@ namespace MonoTorrent.Client
 
         /// <summary>
         /// Returns the full path to the <see cref="FastResume"/> file for the specified torrent. This is
-        /// where data will be written to, or loaded from, when <see cref="AutoSaveLoadFastResume"/> is enabled. 
+        /// where data will be written to, or loaded from, when <see cref="AutoSaveLoadFastResume"/> is enabled.
         /// </summary>
         /// <param name="infoHashes">The infohashes for the torrent</param>
         /// <returns></returns>
@@ -388,6 +402,7 @@ namespace MonoTorrent.Client
                    && FastResumeMode == other.FastResumeMode
                    && HttpStreamingPrefix == other.HttpStreamingPrefix
                    && AreEquivalent (ListenEndPoints, other.ListenEndPoints)
+                   && AreEquivalent (OutgoingLocalEndPoints, other.OutgoingLocalEndPoints)
                    && AreEquivalent (ReportedListenEndPoints, other.ReportedListenEndPoints)
                    && MaximumConnections == other.MaximumConnections
                    && MaximumDiskReadRate == other.MaximumDiskReadRate

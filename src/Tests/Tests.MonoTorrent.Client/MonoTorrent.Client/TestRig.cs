@@ -253,7 +253,7 @@ namespace MonoTorrent.Client
             Uri = uri ?? new Uri ("ipv4://127.0.0.1:1234");
         }
 
-        public ReusableTask ConnectAsync ()
+        public ReusableTask ConnectAsync (IDictionary<string, IPEndPoint> settingsOutgoingLocalEndPoints)
             => throw new InvalidOperationException ();
 
         public void Dispose ()

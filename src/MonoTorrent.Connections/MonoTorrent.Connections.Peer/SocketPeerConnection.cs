@@ -13,10 +13,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -28,10 +28,13 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Threading;
+
+using MonoTorrent.Connections.Extensions;
 
 using ReusableTasks;
 
@@ -71,13 +74,11 @@ namespace MonoTorrent.Connections.Peer
         public SocketPeerConnection (Socket socket, bool isIncoming)
             : this (null, null, socket, isIncoming)
         {
-
         }
 
         public SocketPeerConnection (Uri uri, ISocketConnector connector)
             : this (uri, connector, null, false)
         {
-
         }
 
         SocketPeerConnection (Uri? uri, ISocketConnector? connector, Socket? socket, bool isIncoming)
@@ -123,12 +124,20 @@ namespace MonoTorrent.Connections.Peer
 
         #region Async Methods
 
-        public async ReusableTask ConnectAsync ()
+        public async ReusableTask ConnectAsync (IDictionary<string, IPEndPoint> settingsOutgoingLocalEndPoints)
         {
             if (Connector == null)
                 throw new InvalidOperationException ("This connection represents an incoming connection");
 
-            Socket = await Connector.ConnectAsync (Uri, ConnectCancellation.Token);
+            var addressFamily = Uri.ReadAddressFamilyFromUri ();
+            IPEndPoint? localEndPoint = null;
+
+            if (settingsOutgoingLocalEndPoints.TryGetValue (
+                    addressFamily == AddressFamily.InterNetwork ? "ipv4" : "ipv6", out IPEndPoint? endPoint)) {
+                localEndPoint = endPoint;
+            }
+
+            Socket = await Connector.ConnectAsync (Uri, localEndPoint, ConnectCancellation.Token);
             if (Disposed) {
                 Socket.Dispose ();
                 throw new SocketException ((int) SocketError.Shutdown);
@@ -143,8 +152,9 @@ namespace MonoTorrent.Connections.Peer
             if (ReceiveArgs == null) {
                 ReceiveArgs = new SocketAsyncEventArgs ();
                 ReceiveArgs.Completed += Handler;
-                ReceiveArgs .UserToken = ReceiveTcs;
+                ReceiveArgs.UserToken = ReceiveTcs;
             }
+
             SetBuffer (ReceiveArgs, buffer);
 
             SocketAsyncEventArgs args = ReceiveArgs;
@@ -175,6 +185,7 @@ namespace MonoTorrent.Connections.Peer
                 SendArgs.Completed += Handler;
                 SendArgs.UserToken = SendTcs;
             }
+
             SetBuffer (SendArgs, buffer);
 
             SocketAsyncEventArgs args = SendArgs;
@@ -214,5 +225,5 @@ namespace MonoTorrent.Connections.Peer
         }
     }
 
-#endregion
+    #endregion
 }

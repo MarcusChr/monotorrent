@@ -29,6 +29,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Net;
 
 using MonoTorrent.Client.RateLimiters;
 using MonoTorrent.Connections.Peer;
@@ -110,11 +111,12 @@ namespace MonoTorrent.Client
             }
         }
 
-        public static async ReusableTask ConnectAsync (IPeerConnection connection)
+        public static async ReusableTask ConnectAsync (IPeerConnection connection,
+            IDictionary<string, IPEndPoint> settingsOutgoingLocalEndPoints)
         {
             await MainLoop.SwitchToThreadpool ();
 
-            await connection.ConnectAsync ();
+            await connection.ConnectAsync (settingsOutgoingLocalEndPoints);
         }
 
         public static ReusableTask ReceiveAsync (IPeerConnection connection, Memory<byte> buffer)

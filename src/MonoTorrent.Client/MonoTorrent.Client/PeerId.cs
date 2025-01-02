@@ -50,7 +50,7 @@ namespace MonoTorrent.Client
         public bool IsIncoming { get; }
         public Uri Uri { get; } = new Uri ("test://1234.com:3434");
 
-        public ReusableTask ConnectAsync ()
+        public ReusableTask ConnectAsync (IDictionary<string, IPEndPoint> settingsOutgoingLocalEndPoints)
         {
             throw new NotImplementedException ();
         }

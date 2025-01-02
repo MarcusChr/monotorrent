@@ -13,10 +13,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -32,6 +32,8 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+
+using MonoTorrent.Connections.Extensions;
 
 using ReusableTasks;
 
@@ -70,9 +72,16 @@ namespace MonoTorrent.Connections
 
 
 #if NETSTANDARD2_0 || NETSTANDARD2_1 || NET472
-        public async ReusableTask<Socket> ConnectAsync (Uri uri, CancellationToken token)
+        public async ReusableTask<Socket> ConnectAsync (Uri uri, IPEndPoint? localIpEndpoint, CancellationToken token)
         {
-            var socket = new Socket ((uri.Scheme == "ipv4") ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
+            var remoteAddressFamily = uri.ReadAddressFamilyFromUri();
+
+            var socket = new Socket (remoteAddressFamily, SocketType.Stream, ProtocolType.Tcp);
+
+            if (localIpEndpoint != null) {
+                socket.Bind (localIpEndpoint);
+            }
+
             var endPoint = new IPEndPoint (IPAddress.Parse (uri.Host), uri.Port);
 
             using var registration = token.Register (SocketDisposer, socket);
@@ -93,10 +102,16 @@ namespace MonoTorrent.Connections
             return socket;
         }
 #else
-        public async ReusableTask<Socket> ConnectAsync (Uri uri, CancellationToken token)
+        public async ReusableTask<Socket> ConnectAsync (Uri uri, IPEndPoint? localIpEndpoint, CancellationToken token)
         {
-            var socket = new Socket ((uri.Scheme == "ipv4") ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
+            var remoteAddressFamily = uri.ReadAddressFamilyFromUri();
+
+            var socket = new Socket (remoteAddressFamily, SocketType.Stream, ProtocolType.Tcp);
             var endPoint = new IPEndPoint (IPAddress.Parse (uri.Host), uri.Port);
+
+            if (localIpEndpoint != null) {
+                socket.Bind (localIpEndpoint);
+            }
 
             using var registration = token.Register (SocketDisposer, socket);
             var tcs = new ReusableTaskCompletionSource<int> ();

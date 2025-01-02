@@ -60,7 +60,7 @@ namespace MonoTorrent.Client
 
             public ReusableTaskCompletionSource<bool> ConnectAsyncInvokedTask = new ReusableTaskCompletionSource<bool> ();
             public ReusableTaskCompletionSource<bool> ConnectAsyncResultTask = new ReusableTaskCompletionSource<bool> ();
-            public async ReusableTask ConnectAsync ()
+            public async ReusableTask ConnectAsync (IDictionary<string, IPEndPoint> settingsOutgoingLocalEndPoints)
             {
                 ConnectAsyncInvokedTask.SetResult (true);
                 await ConnectAsyncResultTask.Task;

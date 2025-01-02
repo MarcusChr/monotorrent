@@ -169,7 +169,7 @@ namespace MonoTorrent.Connections.Peer
 
         #endregion Constructors
 
-        public ReusableTask ConnectAsync ()
+        public ReusableTask ConnectAsync (IDictionary<string, IPEndPoint> settingsOutgoingLocalEndPoints)
         {
             return ReusableTask.CompletedTask;
         }
